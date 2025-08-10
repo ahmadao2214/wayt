@@ -1,260 +1,130 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import { Task } from '../types/task';
-import { useTaskStore } from '../stores/taskStore';
-import Colors from '../constants/Colors';
+import React, { useState } from 'react';
+import { StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { Text, View } from './Themed';
+import { Task } from '@/types/task';
+import { useTaskStore } from '@/stores/taskStore';
+import { Ionicons } from '@expo/vector-icons';
 
 interface TaskItemProps {
   task: Task;
 }
 
-export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
-  const { toggleTask, deleteTask, updateTask } = useTaskStore();
+export function TaskItem({ task }: TaskItemProps) {
+  const toggleTask = useTaskStore((s) => s.toggleTask);
+  const deleteTask = useTaskStore((s) => s.deleteTask);
+  const updateTask = useTaskStore((s) => s.updateTask);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [isEditingTime, setIsEditingTime] = useState(false);
+  const [isEditingDuration, setIsEditingDuration] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
-  const [editTime, setEditTime] = useState(task.timeSlot?.toString() || '15');
-  const titleInputRef = useRef<TextInput>(null);
-  const timeInputRef = useRef<TextInput>(null);
-
-  const handleDelete = () => {
-    deleteTask(task.id);
-  };
-
-  const handleTitleEdit = () => {
-    setIsEditingTitle(true);
-    setTimeout(() => titleInputRef.current?.focus(), 100);
-  };
+  const [editDuration, setEditDuration] = useState(String(task.timeSlot ?? 15));
 
   const handleTitleSave = () => {
-    if (editTitle.trim()) {
+    if (editTitle.trim() && editTitle !== task.title) {
       updateTask(task.id, { title: editTitle.trim() });
-      setIsEditingTitle(false);
-    } else {
-      setEditTitle(task.title);
-      setIsEditingTitle(false);
     }
+    setIsEditingTitle(false);
   };
 
-  const handleTimeEdit = () => {
-    setIsEditingTime(true);
-    setTimeout(() => timeInputRef.current?.focus(), 100);
-  };
-
-  const handleTimeSave = () => {
-    const timeValue = parseInt(editTime) || 15;
-    updateTask(task.id, { timeSlot: timeValue });
-    setIsEditingTime(false);
-  };
-
-  const formatTime = (minutes: number) => {
-    if (minutes < 60) {
-      return `${minutes}m`;
+  const handleDurationSave = () => {
+    const duration = parseInt(editDuration) || 15;
+    if (duration !== (task.timeSlot ?? 15)) {
+      updateTask(task.id, { timeSlot: duration });
     }
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+    setIsEditingDuration(false);
   };
 
   return (
-    <View style={[styles.container, task.completed && styles.completedContainer]}>
-      <TouchableOpacity 
-        style={styles.taskContent} 
-        onPress={() => toggleTask(task.id)}
-        activeOpacity={0.7}
-      >
-        <View style={[styles.checkbox, task.completed && styles.checked]}>
-          {task.completed && (
-            <View style={styles.checkmarkContainer}>
-              <Text style={styles.checkmark}>✓</Text>
-            </View>
-          )}
-        </View>
-        
-        <View style={styles.textContainer}>
-          {isEditingTitle ? (
-            <TextInput
-              ref={titleInputRef}
-              style={[styles.title, styles.editInput]}
-              value={editTitle}
-              onChangeText={setEditTitle}
-              onBlur={handleTitleSave}
-              onSubmitEditing={handleTitleSave}
-              returnKeyType="done"
-              autoFocus
-              placeholderTextColor={Colors.light.textTertiary}
-            />
-          ) : (
-            <TouchableOpacity onPress={handleTitleEdit} style={styles.titleContainer}>
-              <Text style={[styles.title, task.completed && styles.completedText]}>
-                {task.title}
-              </Text>
-            </TouchableOpacity>
-          )}
-          
-          <View style={styles.metadata}>
-            {isEditingTime ? (
-              <TextInput
-                ref={timeInputRef}
-                style={[styles.timeSlot, styles.editInput]}
-                value={editTime}
-                onChangeText={setEditTime}
-                onBlur={handleTimeSave}
-                onSubmitEditing={handleTimeSave}
-                returnKeyType="done"
-                keyboardType="numeric"
-                autoFocus
-                placeholderTextColor={Colors.light.textTertiary}
-              />
-            ) : (
-              <TouchableOpacity onPress={handleTimeEdit} style={styles.timeContainer}>
-                <View style={styles.timeBadge}>
-                  <Text style={styles.timeSlot}>⏱️ {formatTime(task.timeSlot || 15)}</Text>
-                </View>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.checkbox} onPress={() => toggleTask(task.id)}>
+        <Ionicons
+          name={task.completed ? 'checkmark-circle' : 'ellipse-outline'}
+          size={24}
+          color={task.completed ? '#4CAF50' : '#666'}
+        />
       </TouchableOpacity>
-      
-      <TouchableOpacity 
-        style={styles.deleteButton} 
-        onPress={handleDelete}
-        activeOpacity={0.6}
-      >
-        <Text style={styles.deleteText}>🗑️</Text>
+
+      <TouchableOpacity style={styles.titleContainer} onPress={() => setIsEditingTitle(true)}>
+        {isEditingTitle ? (
+          <TextInput
+            style={styles.titleInput}
+            value={editTitle}
+            onChangeText={setEditTitle}
+            onBlur={handleTitleSave}
+            onSubmitEditing={handleTitleSave}
+            autoFocus
+            selectTextOnFocus
+          />
+        ) : (
+          <Text style={[styles.title, task.completed && styles.completedText]}>{task.title}</Text>
+        )}
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.durationContainer} onPress={() => setIsEditingDuration(true)}>
+        {isEditingDuration ? (
+          <TextInput
+            style={styles.durationInput}
+            value={editDuration}
+            onChangeText={setEditDuration}
+            onBlur={handleDurationSave}
+            onSubmitEditing={handleDurationSave}
+            keyboardType="numeric"
+            autoFocus
+            selectTextOnFocus
+            maxLength={3}
+          />
+        ) : (
+          <Text style={styles.duration}>{task.timeSlot ?? 15} min</Text>
+        )}
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => deleteTask(task.id)} style={styles.deleteButton}>
+        <Ionicons name="trash-outline" size={20} color="#ff4444" />
       </TouchableOpacity>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: Colors.light.surface,
-    marginVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    shadowColor: Colors.light.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-    ...Platform.select({
-      web: {
-        transition: 'all 0.2s ease-in-out',
-        cursor: 'pointer',
-        ':hover': {
-          transform: 'translateY(-1px)',
-          shadowOpacity: 0.12,
-        },
-      },
-    }),
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    minHeight: 60,
+    backgroundColor: '#fff',
   },
-  completedContainer: {
-    opacity: 0.7,
-    backgroundColor: Colors.light.background,
-  },
-  taskContent: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: Colors.light.border,
-    marginRight: 12,
-    marginTop: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.light.surface,
-  },
-  checked: {
-    backgroundColor: Colors.light.primary,
-    borderColor: Colors.light.primary,
-  },
-  checkmarkContainer: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkmark: {
-    color: Colors.light.surface,
-    fontSize: 12,
-    fontWeight: 'bold',
-    lineHeight: 16,
-  },
-  textContainer: {
-    flex: 1,
-    paddingRight: 8,
-  },
-  title: {
-    fontSize: 16,
-    lineHeight: 22,
-    color: Colors.light.text,
-    fontWeight: '500',
-    letterSpacing: -0.2,
-  },
-  completedText: {
-    textDecorationLine: 'line-through',
-    color: Colors.light.textTertiary,
-  },
-  editInput: {
-    borderWidth: 1,
-    borderColor: Colors.light.primary,
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: Colors.light.surface,
-    fontSize: 16,
-    color: Colors.light.text,
-  },
-  titleContainer: {
-    flex: 1,
-  },
-  metadata: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  timeContainer: {
-    marginLeft: 0,
-  },
-  timeBadge: {
-    backgroundColor: Colors.light.accent + '20',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.light.accent + '30',
-  },
-  timeSlot: {
-    fontSize: 12,
-    color: Colors.light.textSecondary,
-    fontWeight: '500',
-  },
-  deleteButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.light.error + '10',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 8,
-    borderWidth: 1,
-    borderColor: Colors.light.error + '20',
-  },
-  deleteText: {
-    color: Colors.light.error,
-    fontSize: 18,
-    fontWeight: 'bold',
+  checkbox: { marginRight: 12, padding: 4 },
+  titleContainer: { flex: 1, paddingRight: 12, borderRadius: 6, paddingVertical: 4, paddingHorizontal: 4 },
+  title: { fontSize: 16, lineHeight: 20 },
+  titleInput: {
+    fontSize: 15,
     lineHeight: 20,
+    borderWidth: 1,
+    borderColor: '#c9c9c9',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    backgroundColor: '#fff',
   },
+  completedText: { textDecorationLine: 'line-through', opacity: 0.6 },
+  durationContainer: { paddingHorizontal: 8, paddingVertical: 4, marginRight: 8, borderRadius: 6 },
+  duration: { fontSize: 14, color: '#666', fontWeight: '500' },
+  durationInput: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+    borderWidth: 1,
+    borderColor: '#c9c9c9',
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    backgroundColor: '#fff',
+    textAlign: 'center',
+    minWidth: 40,
+  },
+  deleteButton: { padding: 8, borderRadius: 6 },
 });
+
+export default TaskItem;

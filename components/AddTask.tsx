@@ -1,139 +1,102 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { useTaskStore } from '../stores/taskStore';
-import Colors from '../constants/Colors';
+import { StyleSheet, TextInput, TouchableOpacity, View, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text } from './Themed';
+import { useTaskStore } from '@/stores/taskStore';
+import { Ionicons } from '@expo/vector-icons';
 
-export const AddTask: React.FC = () => {
+export function AddTask() {
   const [title, setTitle] = useState('');
-  const [timeSlot, setTimeSlot] = useState('15');
-  const { addTask } = useTaskStore();
-  const inputRef = useRef<TextInput>(null);
+  const [duration, setDuration] = useState('15');
+  const addTask = useTaskStore((s) => s.addTask);
+  const titleRef = useRef<TextInput>(null);
+  const insets = useSafeAreaInsets();
 
-  const handleAddTask = () => {
-    if (title.trim()) {
-      const timeSlotMinutes = parseInt(timeSlot) || 15;
-      addTask(title.trim(), undefined, timeSlotMinutes);
-      setTitle('');
-      setTimeSlot('15');
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-    }
+  const handleAdd = () => {
+    if (!title.trim()) return;
+    addTask(title.trim(), undefined, parseInt(duration) || 15);
+    setTitle('');
+    setDuration('15');
+    setTimeout(() => titleRef.current?.focus(), 50);
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.inputRow}>
+    <View style={[styles.container, { paddingBottom: Math.max(12, insets.bottom || 0) }] }>
+      <View style={styles.inputContainer}>
         <TextInput
-          ref={inputRef}
-          style={styles.taskInput}
-          placeholder="Add a task..."
-          placeholderTextColor={Colors.light.textTertiary}
+          ref={titleRef}
+          style={styles.titleInput}
+          placeholder="Add a new task..."
           value={title}
           onChangeText={setTitle}
-          onSubmitEditing={handleAddTask}
+          onSubmitEditing={handleAdd}
           returnKeyType="done"
-          blurOnSubmit={false}
         />
-        
-        <View style={styles.timeInputWrapper}>
-          <TextInput
-            style={styles.timeInput}
-            placeholder="15"
-            placeholderTextColor={Colors.light.textTertiary}
-            value={timeSlot}
-            onChangeText={setTimeSlot}
-            keyboardType="numeric"
-            returnKeyType="done"
-          />
-          <Text style={styles.timeUnit}>m</Text>
-        </View>
-
-        <TouchableOpacity 
-          style={[styles.addButton, !title.trim() && styles.addButtonDisabled]} 
-          onPress={handleAddTask}
+        <TextInput
+          style={styles.durationInput}
+          placeholder="15"
+          value={duration}
+          onChangeText={setDuration}
+          keyboardType="numeric"
+          maxLength={3}
+          returnKeyType="done"
+        />
+        <Text style={styles.minText}>min</Text>
+        <TouchableOpacity
+          style={[styles.addButton, !title.trim() && styles.disabledButton]}
+          onPress={handleAdd}
           disabled={!title.trim()}
-          activeOpacity={0.7}
         >
-          <Text style={[styles.addButtonText, !title.trim() && styles.addButtonTextDisabled]}>
-            +
-          </Text>
+          <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.light.surface,
-    margin: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    padding: 16,
-    shadowColor: Colors.light.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  taskInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: Colors.light.background,
-    color: Colors.light.text,
-  },
-  timeInputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    borderRadius: 8,
-    backgroundColor: Colors.light.background,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    minWidth: 50,
-  },
-  timeInput: {
-    fontSize: 14,
-    color: Colors.light.text,
-    padding: 0,
-    marginRight: 2,
-    minWidth: 25,
-  },
-  timeUnit: {
-    fontSize: 12,
-    color: Colors.light.textSecondary,
-    fontWeight: '500',
-  },
-  addButton: {
-    backgroundColor: Colors.light.primary,
+    width: '100%',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    backgroundColor: '#fff',
+  },
+  inputContainer: { flexDirection: 'row', alignItems: 'center' },
+  titleInput: {
+    flex: 1,
+    height: 44,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
     borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 44,
-  },
-  addButtonDisabled: {
-    backgroundColor: Colors.light.border,
-  },
-  addButtonText: {
-    color: Colors.light.surface,
     fontSize: 16,
-    fontWeight: '600',
+    marginRight: 8,
+    backgroundColor: '#fff',
   },
-  addButtonTextDisabled: {
-    color: Colors.light.textTertiary,
+  durationInput: {
+    width: 50,
+    height: 44,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    fontSize: 16,
+    textAlign: 'center',
+    marginRight: 4,
+    backgroundColor: '#fff',
   },
+  minText: { fontSize: 14, color: '#666', marginRight: 12 },
+  addButton: {
+    width: 44,
+    height: 44,
+    backgroundColor: '#007AFF',
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  disabledButton: { backgroundColor: '#ccc' },
 });
+
+export default AddTask;

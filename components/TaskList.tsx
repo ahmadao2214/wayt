@@ -1,79 +1,45 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { TaskItem } from './TaskItem';
-import { useTaskStore } from '../stores/taskStore';
-import Colors from '../constants/Colors';
+import { StyleSheet, View, Platform } from 'react-native';
+import { useTaskStore } from '@/stores/taskStore';
+import TaskItem from './TaskItem';
+// Resolve platform DnD implementation at runtime
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const PlatformSortable: any = Platform.OS === 'web'
+  ? require('./dnd/PlatformSortable.web').default
+  : require('./dnd/PlatformSortable.native').default;
 
-export const TaskList: React.FC = () => {
-  const { tasks } = useTaskStore();
+export function TaskList() {
+  const { tasks, reorderTasks } = useTaskStore();
+  const sortedTasks = React.useMemo(() => [...tasks].sort((a, b) => a.order - b.order), [tasks]);
 
-  const renderTask = ({ item }: { item: any }) => (
-    <TaskItem task={item} />
-  );
+  const handleMove = (from: number, to: number) => {
+    if (from === to) return;
+    const newTasks = [...sortedTasks];
+    const [movedTask] = newTasks.splice(from, 1);
+    newTasks.splice(to, 0, movedTask);
+    const reordered = newTasks.map((t, i) => ({ ...t, order: i, updatedAt: new Date() }));
+    reorderTasks(reordered);
+  };
 
-  if (tasks.length === 0) {
-    return (
-      <View style={styles.emptyContainer}>
-        <View style={styles.emptyIcon}>
-          <Text style={styles.emptyIconText}>📝</Text>
-        </View>
-        <Text style={styles.emptyText}>No tasks yet</Text>
-        <Text style={styles.emptySubtext}>Add your first task to get started with organizing your day</Text>
-      </View>
-    );
+  if (sortedTasks.length === 0) {
+    return <View style={styles.empty} />;
   }
 
   return (
-    <FlatList
-      data={tasks}
-      renderItem={renderTask}
-      keyExtractor={(item) => item.id}
-      style={styles.list}
-      contentContainerStyle={styles.listContent}
-      showsVerticalScrollIndicator={false}
-    />
+    <View style={styles.list}>
+      <PlatformSortable
+        items={sortedTasks}
+        itemHeight={60}
+        onMove={handleMove}
+        renderItem={(item: any) => <TaskItem task={item} />}
+      />
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  list: {
-    flex: 1,
-  },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  emptyIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.light.accent + '20',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  emptyIconText: {
-    fontSize: 32,
-  },
-  emptyText: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.light.text,
-    marginBottom: 8,
-    textAlign: 'center',
-    letterSpacing: -0.3,
-  },
-  emptySubtext: {
-    fontSize: 16,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-    maxWidth: 280,
-  },
+  list: { flex: 1, width: '100%' },
+  empty: { flex: 1 },
 });
+
+export default TaskList;
