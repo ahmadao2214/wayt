@@ -12,7 +12,8 @@ export interface PlatformSortableProps<TItem extends { id: string }> {
 export function PlatformSortable<TItem extends { id: string }>(
   { items, itemHeight, renderItem, onMove }: PlatformSortableProps<TItem>
 ) {
-  const [overId, setOverId] = React.useState<string | null>(null);
+  const [dragFromIndex, setDragFromIndex] = React.useState<number | null>(null);
+  const [dragToIndex, setDragToIndex] = React.useState<number | null>(null);
 
   const renderRow = React.useCallback((props: SortableRenderItemProps<TItem>) => {
     const { item, id, positions, lowerBound, autoScrollDirection, itemsCount, itemHeight: libItemHeight } = props;
@@ -26,18 +27,26 @@ export function PlatformSortable<TItem extends { id: string }>(
         autoScrollDirection={autoScrollDirection}
         itemsCount={itemsCount}
         itemHeight={libItemHeight}
-        onMove={(_id, from, to) => onMove(from, to)}
-        onDragging={(_draggingId, currentOverId) => setOverId(currentOverId ?? null)}
-        onDrop={() => setOverId(null)}
+        onMove={(_id, from, to) => {
+          setDragFromIndex(from);
+          setDragToIndex(to);
+        }}
+        onDrop={() => {
+          // Commit the final move once the drag ends to avoid janky re-renders mid-gesture
+          if (dragFromIndex !== null && dragToIndex !== null && dragFromIndex !== dragToIndex) {
+            onMove(dragFromIndex, dragToIndex);
+          }
+          setDragFromIndex(null);
+          setDragToIndex(null);
+        }}
         style={{ height: itemHeight }}
       >
         <View style={styles.rowContainer}>
-          {overId === id && <View pointerEvents="none" style={styles.insertionIndicator} />}
           {renderItem(item)}
         </View>
       </SortableItem>
     );
-  }, [overId, onMove, renderItem, itemHeight]);
+  }, [onMove, renderItem, itemHeight, dragFromIndex, dragToIndex]);
 
   return (
     <Sortable
