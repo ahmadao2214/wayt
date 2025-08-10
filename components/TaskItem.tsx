@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { Text, View } from './Themed';
+import Colors from '@/constants/Colors';
 import { Task } from '@/types/task';
 import { useTaskStore } from '@/stores/taskStore';
 import { Ionicons } from '@expo/vector-icons';
@@ -97,7 +98,7 @@ const styles = StyleSheet.create({
   },
   checkbox: { marginRight: 12, padding: 4 },
   titleContainer: { flex: 1, paddingRight: 12, borderRadius: 6, paddingVertical: 4, paddingHorizontal: 4 },
-  title: { fontSize: 16, lineHeight: 20 },
+  title: { fontSize: 18, lineHeight: 22, color: Colors.light.text, fontWeight: '600' },
   titleInput: {
     fontSize: 15,
     lineHeight: 20,
@@ -108,9 +109,9 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     backgroundColor: '#fff',
   },
-  completedText: { textDecorationLine: 'line-through', opacity: 0.6 },
+  completedText: { textDecorationLine: 'line-through', color: Colors.light.textSecondary },
   durationContainer: { paddingHorizontal: 8, paddingVertical: 4, marginRight: 8, borderRadius: 6 },
-  duration: { fontSize: 14, color: '#666', fontWeight: '500' },
+  duration: { fontSize: 15, color: Colors.light.textSecondary, fontWeight: '500' },
   durationInput: {
     fontSize: 13,
     color: '#666',

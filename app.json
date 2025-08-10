@@ -23,6 +23,9 @@
       },
       "edgeToEdgeEnabled": true
     },
+    "android": {
+      "softwareKeyboardLayoutMode": "resize"
+    },
     "web": {
       "bundler": "metro",
       "output": "static",

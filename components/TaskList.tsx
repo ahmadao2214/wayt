@@ -10,7 +10,8 @@ const PlatformSortable: any = Platform.OS === 'web'
 
 export function TaskList() {
   const { tasks, reorderTasks } = useTaskStore();
-  const sortedTasks = React.useMemo(() => [...tasks].sort((a, b) => a.order - b.order), [tasks]);
+  const [version, setVersion] = React.useState(0);
+  const sortedTasks = React.useMemo(() => [...tasks].sort((a, b) => a.order - b.order), [tasks, version]);
 
   const handleMove = (from: number, to: number) => {
     if (from === to) return;
@@ -21,18 +22,25 @@ export function TaskList() {
     reorderTasks(reordered);
   };
 
-  if (sortedTasks.length === 0) {
-    return <View style={styles.empty} />;
-  }
+  React.useEffect(() => {
+    // Force a render tick on native after tasks change to avoid rare layout delays
+    setVersion((v) => v + 1);
+  }, [tasks.length]);
+
+  const isEmpty = sortedTasks.length === 0;
 
   return (
     <View style={styles.list}>
-      <PlatformSortable
-        items={sortedTasks}
-        itemHeight={60}
-        onMove={handleMove}
-        renderItem={(item: any) => <TaskItem task={item} />}
-      />
+      {isEmpty ? (
+        <View style={styles.empty} />
+      ) : (
+        <PlatformSortable
+          items={sortedTasks}
+          itemHeight={60}
+          onMove={handleMove}
+          renderItem={(item: any) => <TaskItem task={item} />}
+        />
+      )}
     </View>
   );
 }

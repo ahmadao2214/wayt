@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View, Platform } from 'react-native';
+import { StyleSheet, TextInput, TouchableOpacity, View, Platform, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from './Themed';
 import { useTaskStore } from '@/stores/taskStore';
@@ -17,7 +17,11 @@ export function AddTask() {
     addTask(title.trim(), undefined, parseInt(duration) || 15);
     setTitle('');
     setDuration('15');
-    setTimeout(() => titleRef.current?.focus(), 50);
+    if (Platform.OS === 'web') {
+      setTimeout(() => titleRef.current?.focus(), 50);
+    } else {
+      Keyboard.dismiss();
+    }
   };
 
   return (
