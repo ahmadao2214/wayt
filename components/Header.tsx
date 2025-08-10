@@ -5,7 +5,7 @@ import Colors from '../constants/Colors';
 export const Header: React.FC = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.brandName}>wayt</Text>
+      <Text style={styles.brandName}>Wayt</Text>
     </View>
   );
 };

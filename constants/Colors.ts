@@ -1,41 +1,41 @@
-const tintColorLight = '#8B4513'; // Saddle Brown - warm, earthy tone
-const tintColorDark = '#D2691E'; // Chocolate - warm accent for dark mode
+const tintColorLight = '#000000';
+const tintColorDark = '#ffffff';
 
 export default {
   light: {
-    text: '#2C1810', // Dark brown for primary text
-    textSecondary: '#6B4423', // Medium brown for secondary text
-    textTertiary: '#8B7355', // Light brown for tertiary text
-    background: '#FDFBF7', // Warm off-white background
-    surface: '#FFFFFF', // Pure white for cards
+    text: '#111111',
+    textSecondary: '#666666',
+    textTertiary: '#999999',
+    background: '#FFFFFF',
+    surface: '#FFFFFF',
     tint: tintColorLight,
-    tabIconDefault: '#B8860B', // Dark goldenrod
+    tabIconDefault: '#999999',
     tabIconSelected: tintColorLight,
-    primary: '#8B4513', // Saddle Brown
-    secondary: '#D2691E', // Chocolate
-    accent: '#F4A460', // Sandy Brown
-    success: '#228B22', // Forest Green
-    warning: '#FF8C00', // Dark Orange
-    error: '#DC143C', // Crimson
-    border: '#E6D7C3', // Light beige border
-    shadow: 'rgba(139, 69, 19, 0.1)', // Brown shadow
+    primary: '#000000',
+    secondary: '#333333',
+    accent: '#000000',
+    success: '#22c55e',
+    warning: '#f59e0b',
+    error: '#ef4444',
+    border: '#E5E7EB',
+    shadow: 'rgba(0, 0, 0, 0.08)',
   },
   dark: {
-    text: '#F5F5DC', // Beige text
-    textSecondary: '#DEB887', // Burlywood secondary text
-    textTertiary: '#CD853F', // Peru tertiary text
-    background: '#1A1A1A', // Dark background
-    surface: '#2D2D2D', // Dark surface
+    text: '#F5F5F5',
+    textSecondary: '#A3A3A3',
+    textTertiary: '#737373',
+    background: '#0A0A0A',
+    surface: '#1A1A1A',
     tint: tintColorDark,
-    tabIconDefault: '#D2691E', // Chocolate
+    tabIconDefault: '#A3A3A3',
     tabIconSelected: tintColorDark,
-    primary: '#D2691E', // Chocolate
-    secondary: '#F4A460', // Sandy Brown
-    accent: '#DEB887', // Burlywood
-    success: '#32CD32', // Lime Green
-    warning: '#FFA500', // Orange
-    error: '#FF6347', // Tomato
-    border: '#4A4A4A', // Dark border
-    shadow: 'rgba(0, 0, 0, 0.3)', // Dark shadow
+    primary: '#FFFFFF',
+    secondary: '#E5E5E5',
+    accent: '#FFFFFF',
+    success: '#22c55e',
+    warning: '#f59e0b',
+    error: '#ef4444',
+    border: '#2E2E2E',
+    shadow: 'rgba(0, 0, 0, 0.3)',
   },
 };

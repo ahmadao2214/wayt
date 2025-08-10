@@ -46,7 +46,6 @@ export const AddTask: React.FC = () => {
             keyboardType="numeric"
             returnKeyType="done"
           />
-          <Text style={styles.timeUnit}>m</Text>
         </View>
 
         <TouchableOpacity 
