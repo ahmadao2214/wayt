@@ -28,12 +28,26 @@ export function TaskList() {
   }, [tasks.length]);
 
   const isEmpty = sortedTasks.length === 0;
+  const computedHeight = sortedTasks.length * 60;
+  const isWeb = Platform.OS === 'web';
 
   return (
     <View style={styles.list}>
-      {isEmpty ? (
-        <View style={styles.empty} />
+      {isWeb ? (
+        <View style={[styles.card, !isEmpty && { height: computedHeight } ]}>
+          {isEmpty ? (
+            <View style={{ paddingVertical: 8 }} />
+          ) : (
+            <PlatformSortable
+              items={sortedTasks}
+              itemHeight={60}
+              onMove={handleMove}
+              renderItem={(item: any) => <TaskItem task={item} />}
+            />
+          )}
+        </View>
       ) : (
+        // Native: render without the card wrapper to avoid layout issues
         <PlatformSortable
           items={sortedTasks}
           itemHeight={60}
@@ -48,6 +62,21 @@ export function TaskList() {
 const styles = StyleSheet.create({
   list: { flex: 1, width: '100%' },
   empty: { flex: 1 },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#eeeeee',
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 2,
+    marginTop: 10,
+    marginBottom: 12,
+    overflow: 'visible',
+    paddingVertical: 2,
+  },
 });
 
 export default TaskList;

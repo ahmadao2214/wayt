@@ -54,15 +54,16 @@ export function PlatformSortable<TItem extends { id: string }>(
       renderItem={renderRow}
       itemHeight={itemHeight}
       itemKeyExtractor={(t: TItem) => t.id}
-      style={styles.list}
-      contentContainerStyle={{ paddingBottom: 8 }}
+      style={[styles.list, { height: Math.max(0, items.length * itemHeight) }]}
+      contentContainerStyle={{ paddingBottom: 8, width: '100%' }}
     />
   );
 }
 
 const styles = StyleSheet.create({
   list: {
-    flex: 1,
+    // Let the list size to its content when placed inside non-flex parents (e.g., card wrapper)
+    width: '100%',
   },
   rowContainer: {
     position: 'relative',
