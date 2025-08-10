@@ -3,6 +3,7 @@ export interface Task {
   title: string;
   completed: boolean;
   createdAt: Date;
-  priority?: 'low' | 'medium' | 'high';
   dueDate?: Date;
+  order: number;
+  timeSlot?: number; // Time in minutes
 }

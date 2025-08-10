@@ -1,66 +1,63 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { create } from 'zustand';
 import { Task } from '../types/task';
 
-interface TaskContextType {
+interface TaskStore {
   tasks: Task[];
-  addTask: (title: string, priority?: 'low' | 'medium' | 'high', dueDate?: Date) => void;
+  addTask: (title: string, dueDate?: Date, timeSlot?: number) => void;
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
+  reorderTasks: (tasks: Task[]) => void;
 }
 
-const TaskContext = createContext<TaskContextType | undefined>(undefined);
+export const useTaskStore = create<TaskStore>((set) => ({
+  tasks: [],
 
-export const useTaskStore = () => {
-  const context = useContext(TaskContext);
-  if (!context) {
-    throw new Error('useTaskStore must be used within a TaskProvider');
-  }
-  return context;
-};
-
-interface TaskProviderProps {
-  children: ReactNode;
-}
-
-export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-
-  const addTask = (title: string, priority?: 'low' | 'medium' | 'high', dueDate?: Date) => {
+  addTask: (title: string, dueDate?: Date, timeSlot?: number) => {
     const newTask: Task = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       title,
       completed: false,
       createdAt: new Date(),
-      priority,
       dueDate,
+      timeSlot: timeSlot || 15, // Default to 15 minutes
+      order: 0, // Will be set properly in the setter
     };
-    setTasks(prev => [...prev, newTask]);
-  };
+    console.log('Adding task with ID:', newTask.id);
+    set((state) => ({
+      tasks: [...state.tasks, { ...newTask, order: state.tasks.length }]
+    }));
+  },
 
-  const toggleTask = (id: string) => {
-    setTasks(prev => 
-      prev.map(task => 
+  toggleTask: (id: string) => {
+    set((state) => ({
+      tasks: state.tasks.map(task => 
         task.id === id ? { ...task, completed: !task.completed } : task
       )
-    );
-  };
+    }));
+  },
 
-  const deleteTask = (id: string) => {
-    setTasks(prev => prev.filter(task => task.id !== id));
-  };
+  deleteTask: (id: string) => {
+    console.log('deleteTask called with id:', id);
+    set((state) => {
+      console.log('Current tasks before delete:', state.tasks.length);
+      console.log('Task IDs:', state.tasks.map(t => t.id));
+      const newTasks = state.tasks.filter(task => task.id !== id);
+      console.log('Tasks after delete:', newTasks.length);
+      console.log('Remaining task IDs:', newTasks.map(t => t.id));
+      return { tasks: newTasks };
+    });
+  },
 
-  const updateTask = (id: string, updates: Partial<Task>) => {
-    setTasks(prev => 
-      prev.map(task => 
+  updateTask: (id: string, updates: Partial<Task>) => {
+    set((state) => ({
+      tasks: state.tasks.map(task => 
         task.id === id ? { ...task, ...updates } : task
       )
-    );
-  };
+    }));
+  },
 
-  return (
-    <TaskContext.Provider value={{ tasks, addTask, toggleTask, deleteTask, updateTask }}>
-      {children}
-    </TaskContext.Provider>
-  );
-};
+  reorderTasks: (tasks: Task[]) => {
+    set({ tasks });
+  },
+}));

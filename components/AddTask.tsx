@@ -1,131 +1,139 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTaskStore } from '../stores/taskStore';
+import Colors from '../constants/Colors';
 
 export const AddTask: React.FC = () => {
   const [title, setTitle] = useState('');
-  const [priority, setPriority] = useState<'low' | 'medium' | 'high' | undefined>(undefined);
+  const [timeSlot, setTimeSlot] = useState('15');
   const { addTask } = useTaskStore();
+  const inputRef = useRef<TextInput>(null);
 
   const handleAddTask = () => {
     if (title.trim()) {
-      addTask(title.trim(), priority);
+      const timeSlotMinutes = parseInt(timeSlot) || 15;
+      addTask(title.trim(), undefined, timeSlotMinutes);
       setTitle('');
-      setPriority(undefined);
-    } else {
-      Alert.alert('Error', 'Please enter a task title');
-    }
-  };
-
-  const getPriorityColor = (p: string) => {
-    switch (p) {
-      case 'high': return '#ff6b6b';
-      case 'medium': return '#ffd93d';
-      case 'low': return '#6bcf7f';
-      default: return '#ddd';
+      setTimeSlot('15');
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Add New Task</Text>
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Enter task title..."
-        value={title}
-        onChangeText={setTitle}
-        onSubmitEditing={handleAddTask}
-      />
-
-      <View style={styles.priorityContainer}>
-        <Text style={styles.priorityLabel}>Priority:</Text>
-        <View style={styles.priorityButtons}>
-          {(['low', 'medium', 'high'] as const).map((p) => (
-            <TouchableOpacity
-              key={p}
-              style={[
-                styles.priorityButton,
-                { backgroundColor: getPriorityColor(p) },
-                priority === p && styles.selectedPriority
-              ]}
-              onPress={() => setPriority(priority === p ? undefined : p)}
-            >
-              <Text style={styles.priorityButtonText}>{p}</Text>
-            </TouchableOpacity>
-          ))}
+      <View style={styles.inputRow}>
+        <TextInput
+          ref={inputRef}
+          style={styles.taskInput}
+          placeholder="Add a task..."
+          placeholderTextColor={Colors.light.textTertiary}
+          value={title}
+          onChangeText={setTitle}
+          onSubmitEditing={handleAddTask}
+          returnKeyType="done"
+          blurOnSubmit={false}
+        />
+        
+        <View style={styles.timeInputWrapper}>
+          <TextInput
+            style={styles.timeInput}
+            placeholder="15"
+            placeholderTextColor={Colors.light.textTertiary}
+            value={timeSlot}
+            onChangeText={setTimeSlot}
+            keyboardType="numeric"
+            returnKeyType="done"
+          />
+          <Text style={styles.timeUnit}>m</Text>
         </View>
-      </View>
 
-      <TouchableOpacity style={styles.addButton} onPress={handleAddTask}>
-        <Text style={styles.addButtonText}>Add Task</Text>
-      </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.addButton, !title.trim() && styles.addButtonDisabled]} 
+          onPress={handleAddTask}
+          disabled={!title.trim()}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.addButtonText, !title.trim() && styles.addButtonTextDisabled]}>
+            +
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    backgroundColor: 'white',
+    backgroundColor: Colors.light.surface,
     margin: 16,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: Colors.light.border,
+    padding: 16,
+    shadowColor: Colors.light.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  taskInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    marginBottom: 16,
+    backgroundColor: Colors.light.background,
+    color: Colors.light.text,
   },
-  priorityContainer: {
-    marginBottom: 16,
-  },
-  priorityLabel: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  priorityButtons: {
+  timeInputWrapper: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  priorityButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    minWidth: 80,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    borderRadius: 8,
+    backgroundColor: Colors.light.background,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    minWidth: 50,
   },
-  selectedPriority: {
-    borderWidth: 3,
-    borderColor: '#007AFF',
+  timeInput: {
+    fontSize: 14,
+    color: Colors.light.text,
+    padding: 0,
+    marginRight: 2,
+    minWidth: 25,
   },
-  priorityButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textTransform: 'capitalize',
+  timeUnit: {
+    fontSize: 12,
+    color: Colors.light.textSecondary,
+    fontWeight: '500',
   },
   addButton: {
-    backgroundColor: '#007AFF',
-    padding: 16,
+    backgroundColor: Colors.light.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 44,
+  },
+  addButtonDisabled: {
+    backgroundColor: Colors.light.border,
   },
   addButtonText: {
-    color: 'white',
+    color: Colors.light.surface,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+  },
+  addButtonTextDisabled: {
+    color: Colors.light.textTertiary,
   },
 });

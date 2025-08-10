@@ -15,7 +15,7 @@ A clean, simple task management app built with Expo Router and React Native.
 - **Expo Router** - File-based routing
 - **React Native** - Cross-platform mobile development
 - **TypeScript** - Type safety
-- **React Context** - State management (no external libraries)
+- **Zustand** - Lightweight state management
 
 ## Getting Started
 
@@ -41,7 +41,7 @@ wayt/
 ├── app/                    # Expo Router pages
 │   ├── (tabs)/            # Tab navigation
 │   │   └── index.tsx      # Main tasks page
-│   └── _layout.tsx        # Root layout with TaskProvider
+│   └── _layout.tsx        # Root layout
 ├── components/            # Reusable components
 │   ├── AddTask.tsx        # Task creation form
 │   ├── TaskItem.tsx       # Individual task display
@@ -54,11 +54,11 @@ wayt/
 
 ## State Management
 
-The app uses React Context for state management, keeping it simple and lightweight:
+The app uses Zustand for state management, providing a simple and lightweight solution:
 
-- `TaskProvider` - Wraps the app and provides task state
-- `useTaskStore` - Hook to access task operations
+- `useTaskStore` - Hook to access task operations and state
 - Tasks are stored in memory (can be extended with AsyncStorage later)
+- No provider wrapper needed - Zustand handles state globally
 
 ## Future Enhancements
 
