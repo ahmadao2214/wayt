@@ -34,18 +34,18 @@ export function TaskList() {
   return (
     <View style={styles.list}>
       {isWeb ? (
-        <View style={[styles.card, !isEmpty && { height: computedHeight } ]}>
-          {isEmpty ? (
-            <View style={{ paddingVertical: 8 }} />
-          ) : (
+        isEmpty ? (
+          <View style={{ paddingVertical: 4 }} />
+        ) : (
+          <View style={[styles.card, { height: computedHeight }] }>
             <PlatformSortable
               items={sortedTasks}
               itemHeight={60}
               onMove={handleMove}
               renderItem={(item: any) => <TaskItem task={item} />}
             />
-          )}
-        </View>
+          </View>
+        )
       ) : (
         // Native: render without the card wrapper to avoid layout issues
         <PlatformSortable
